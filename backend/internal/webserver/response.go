@@ -8,6 +8,10 @@ import (
 	"github.com/Felipe-Takayuki/Adamas/adamas-api/internal/utils"
 )
 
+type MessageResponse struct {
+	Message string `json:"message"`
+}
+
 func jsonResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)

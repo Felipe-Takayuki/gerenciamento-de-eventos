@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	_ "github.com/Felipe-Takayuki/Adamas/adamas-api/docs"
 	"github.com/Felipe-Takayuki/Adamas/adamas-api/internal/config"
 	"github.com/Felipe-Takayuki/Adamas/adamas-api/internal/database"
 	"github.com/Felipe-Takayuki/Adamas/adamas-api/internal/service"
@@ -12,6 +13,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func NewRouter(db *sql.DB, cfg *config.Config) http.Handler {
@@ -40,6 +42,9 @@ func NewRouter(db *sql.DB, cfg *config.Config) http.Handler {
 		MaxAge:           300,
 	}
 	r.Use(cors.Handler(corsConfig))
+
+	// Documentação Swagger UI (Público)
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	// Health Check (Público)
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {

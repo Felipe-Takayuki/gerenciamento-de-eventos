@@ -16,6 +16,24 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// @title           Gerenciamento de Eventos API
+// @version         1.0
+// @description     API RESTful para gerenciamento de eventos, salas e instituições.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   Suporte da API
+// @contact.email  suporte@adamas.com
+
+// @license.name  MIT
+// @license.url   https://opensource.org/licenses/MIT
+
+// @host      localhost:3000
+// @BasePath  /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Insira o token JWT no formato: Bearer {seu_token}
 func main() {
 	cfg := config.Load()
 
@@ -56,6 +74,7 @@ func main() {
 
 	go func() {
 		log.Printf("servidor iniciado com sucesso na porta %s", cfg.Port)
+		log.Printf("documentação Swagger disponível em: http://localhost:%s/swagger/index.html", cfg.Port)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("erro ao iniciar o servidor: %v", err)
 		}

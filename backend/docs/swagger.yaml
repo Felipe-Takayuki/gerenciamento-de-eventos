@@ -1,0 +1,631 @@
+basePath: /
+definitions:
+  entity.Event:
+    properties:
+      address:
+        type: string
+      description:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: integer
+      institution_id:
+        type: integer
+      institution_name:
+        type: string
+      name:
+        type: string
+      rooms:
+        items:
+          $ref: '#/definitions/entity.RoomEvent'
+        type: array
+      start_date:
+        type: string
+    type: object
+  entity.Institution:
+    properties:
+      cnpj:
+        type: string
+      email:
+        type: string
+      events:
+        items:
+          $ref: '#/definitions/entity.Event'
+        type: array
+      id:
+        type: integer
+      is_admin:
+        type: boolean
+      name:
+        type: string
+      user_type:
+        type: string
+    type: object
+  entity.RoomEvent:
+    properties:
+      name:
+        type: string
+      room_id:
+        type: integer
+    type: object
+  reqs.AddRoomRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  utils.ErrorMessage:
+    properties:
+      message:
+        type: string
+    type: object
+  webserver.CreateEventRequest:
+    properties:
+      address:
+        example: Av. Paulista, 1000, São Paulo - SP
+        type: string
+      description:
+        example: Evento anual de tecnologia e inovação
+        type: string
+      end_date:
+        example: "2026-10-12 18:00:00"
+        type: string
+      name:
+        example: Semana da Tecnologia 2026
+        type: string
+      start_date:
+        example: "2026-10-10 09:00:00"
+        type: string
+    type: object
+  webserver.CreateInstitutionRequest:
+    properties:
+      cnpj:
+        example: "12345678000199"
+        type: string
+      email:
+        example: contato@universidade.edu.br
+        type: string
+      is_admin:
+        example: false
+        type: boolean
+      name:
+        example: Universidade Federal
+        type: string
+      password:
+        example: senhaSegura123
+        type: string
+    type: object
+  webserver.DeleteRoomRequest:
+    properties:
+      room_id:
+        example: 1
+        type: integer
+    type: object
+  webserver.EditEventRequest:
+    properties:
+      address:
+        example: Av. Paulista, 1500, São Paulo - SP
+        type: string
+      description:
+        example: Programação atualizada com palestras internacionais
+        type: string
+      end_date:
+        example: "2026-10-12 18:00:00"
+        type: string
+      name:
+        example: Semana da Tecnologia 2026 - Edição Especial
+        type: string
+      start_date:
+        example: "2026-10-10 09:00:00"
+        type: string
+    type: object
+  webserver.EditRoomRequest:
+    properties:
+      name:
+        example: Auditório Alpha
+        type: string
+      room_id:
+        example: 1
+        type: integer
+    type: object
+  webserver.LoginInstitutionRequest:
+    properties:
+      email:
+        example: admin@adamas.com
+        type: string
+      password:
+        example: admin123
+        type: string
+    type: object
+  webserver.LoginResponse:
+    properties:
+      institution:
+        $ref: '#/definitions/entity.Institution'
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  webserver.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact:
+    email: suporte@adamas.com
+    name: Suporte da API
+  description: API RESTful para gerenciamento de eventos, salas e instituições.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Gerenciamento de Eventos API
+  version: "1.0"
+paths:
+  /event:
+    post:
+      consumes:
+      - application/json
+      description: Cadastra um novo evento vinculado à instituição autenticada.
+      parameters:
+      - description: Dados do evento
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/webserver.CreateEventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.Event'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+      security:
+      - BearerAuth: []
+      summary: Criar um novo evento
+      tags:
+      - events
+  /event/{event_id}:
+    delete:
+      description: Exclui um evento e suas salas associadas. Requer ser instituição
+        proprietária ou admin.
+      parameters:
+      - description: ID do evento
+        in: path
+        name: event_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/webserver.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+      security:
+      - BearerAuth: []
+      summary: Excluir evento
+      tags:
+      - events
+    get:
+      description: Retorna as informações completas de um evento e suas salas pelo
+        seu ID.
+      parameters:
+      - description: ID do evento
+        in: path
+        name: event_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Event'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+      summary: Obter detalhes de um evento
+      tags:
+      - events
+    put:
+      consumes:
+      - application/json
+      description: Atualiza as informações de um evento existente. Requer ser instituição
+        proprietária ou admin.
+      parameters:
+      - description: ID do evento
+        in: path
+        name: event_id
+        required: true
+        type: integer
+      - description: Dados atualizados do evento
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/webserver.EditEventRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Event'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+      security:
+      - BearerAuth: []
+      summary: Editar evento
+      tags:
+      - events
+  /event/{event_id}/room:
+    delete:
+      consumes:
+      - application/json
+      description: Exclui uma sala de um evento. Requer ser instituição proprietária
+        ou admin.
+      parameters:
+      - description: ID do evento
+        in: path
+        name: event_id
+        required: true
+        type: integer
+      - description: ID da sala
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/webserver.DeleteRoomRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/webserver.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+      security:
+      - BearerAuth: []
+      summary: Excluir sala do evento
+      tags:
+      - rooms
+    get:
+      description: Retorna as salas de um evento. Requer ser instituição proprietária
+        ou admin.
+      parameters:
+      - description: ID do evento
+        in: path
+        name: event_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.RoomEvent'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+      security:
+      - BearerAuth: []
+      summary: Listar salas do evento
+      tags:
+      - rooms
+    post:
+      consumes:
+      - application/json
+      description: Adiciona um espaço/sala ao evento especificado. Requer ser instituição
+        proprietária ou admin.
+      parameters:
+      - description: ID do evento
+        in: path
+        name: event_id
+        required: true
+        type: integer
+      - description: Nome da sala
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/reqs.AddRoomRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/entity.RoomEvent'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+      security:
+      - BearerAuth: []
+      summary: Adicionar sala ao evento
+      tags:
+      - rooms
+    put:
+      consumes:
+      - application/json
+      description: Atualiza o nome de uma sala do evento. Requer ser instituição proprietária
+        ou admin.
+      parameters:
+      - description: ID do evento
+        in: path
+        name: event_id
+        required: true
+        type: integer
+      - description: Dados da sala
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/webserver.EditRoomRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.RoomEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+      security:
+      - BearerAuth: []
+      summary: Editar sala do evento
+      tags:
+      - rooms
+  /event/institution/{institution_id}:
+    get:
+      description: Retorna todos os eventos públicos de uma instituição específica.
+      parameters:
+      - description: ID da instituição proprietária
+        in: path
+        name: institution_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Event'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+      summary: Listar eventos por instituição
+      tags:
+      - events
+  /event/search/{event}:
+    get:
+      description: Retorna lista de eventos públicos que correspondam ao termo de
+        busca.
+      parameters:
+      - description: Nome ou termo de busca do evento
+        in: path
+        name: event
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Event'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+      summary: Buscar eventos por nome
+      tags:
+      - events
+  /events:
+    get:
+      description: Retorna a lista pública de todos os eventos cadastrados no sistema.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Event'
+            type: array
+      summary: Listar todos os eventos
+      tags:
+      - events
+  /institution:
+    post:
+      consumes:
+      - application/json
+      description: Cadastra uma nova instituição no sistema. Apenas instituições administradoras
+        têm permissão para esta ação.
+      parameters:
+      - description: Dados da nova instituição
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/webserver.CreateInstitutionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.Institution'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+      security:
+      - BearerAuth: []
+      summary: Criar uma nova instituição
+      tags:
+      - institutions
+  /institution/{institution_id}:
+    get:
+      description: Retorna os dados públicos de uma instituição cadastrada.
+      parameters:
+      - description: ID da instituição
+        in: path
+        name: institution_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Institution'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+      summary: Obter instituição por ID
+      tags:
+      - institutions
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Realiza login com email e senha retornando o token JWT.
+      parameters:
+      - description: Credenciais de acesso
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/webserver.LoginInstitutionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/webserver.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorMessage'
+      summary: Autenticar instituição
+      tags:
+      - auth
+securityDefinitions:
+  BearerAuth:
+    description: 'Insira o token JWT no formato: Bearer {seu_token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
