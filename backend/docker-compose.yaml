@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: host.docker.internal  
+    volumes:
+      - .:/go/src/app
+    depends_on:
+      - db
+    deploy:
+      resources: 
+        limits:
+          cpus: '0.50'
+          memory: 512M  
+  db:
+    image: mariadb:10.5.8-focal
+    container_name: adamas-db
+    restart: always
+    environment: 
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./adamas_db.sql:/docker-entrypoint-initdb.d/adamas_db.sql   
+    deploy:
+      resources: 
+        limits:
+          cpus: '0.30'
+          memory: 512M  
